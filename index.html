@@ -1,1098 +1,498 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Placar Profissional — Jogos Estudantis 2026</title>
-
+<!-- FONTE RETRÔ ESTILO CALCULADORA/LED DIGITAL -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#05070a;
-  --panel:#0d1218;
-  --panel2:#131a24;
-  --line:#222d3a;
-  --lime:#b8ff00;
-  --cyan:#00f0ff;
-  --red:#ff2a44;
-  --yellow:#ffd43b;
-  --magenta:#ff00a0;
-  --text:#f5f7fa;
-  --muted:#7f8c9b;
-  --shadow:0 20px 60px rgba(0,0,0,.65);
-  --bw:4px;
+  --bg:#07090d; --panel:#10151c; --panel2:#151c25; --line:#27313d;
+  --lime:#b8ff00; --cyan:#00d9ff; --red:#ff3b4f; --yellow:#ffd43b;
+  --text:#f5f7fa; --muted:#8c98a6; --shadow:0 20px 60px rgba(0,0,0,.45);
 }
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-  min-height:100vh;
-  background:radial-gradient(circle at top,#121a24 0,#05070a 55%);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
-  padding:14px 20px;
+  min-height:100vh;background:radial-gradient(circle at top,#18212b 0,#07090d 48%);
+  color:var(--text);font-family:Arial,Helvetica,sans-serif;padding:18px;
 }
-
-button,input,select{ font:inherit; }
-button{ cursor:pointer; }
-
-.app{
-  max-width:1240px;
-  margin:auto;
-}
-
-/* CABEÇALHO */
+button,input,select{font:inherit}
+button{cursor:pointer; transition: all 0.2s ease;}
+.app{max-width:1400px;margin:auto}
 .topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-  margin-bottom:12px;
-  padding:12px 24px;
-  background:rgba(13,18,24,.9);
-  border:2px solid var(--line);
-  border-radius:14px;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px; margin-bottom:14px; padding:0 8px;
 }
-
-.topbar-spacer{ width:180px; }
-
-.brand{
-  flex:1;
-  text-align:center;
-  min-width:0;
-}
-
+/* LETREIRO / BRAND MODERNO E DESTACADO */
+.brand{flex:1;text-align:center}
 .brand h1{
-  display:inline-block;
-  max-width:100%;
-  font-size:clamp(1.4rem,3vw,2.6rem);
-  letter-spacing:.06em;
+  font-size:clamp(1.6rem,3.2vw,2.8rem);
+  letter-spacing:.12em;
   text-transform:uppercase;
-  font-weight:1000;
-  background:#090d12;
-  border:var(--bw) solid var(--lime);
-  border-radius:12px;
-  padding:9px 22px;
-  box-shadow:0 0 20px rgba(184,255,0,.4), 0 0 40px rgba(184,255,0,.15);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.brand span{ color:var(--lime); }
-
-.status{
-  width:180px;
-  display:flex;
-  gap:9px;
-  align-items:center;
-  justify-content:flex-end;
-  color:var(--muted);
-  font-size:.88rem;
-  white-space:nowrap;
-}
-
-.dot{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:var(--lime);
-  box-shadow:0 0 14px var(--lime);
-}
-
-/* MODALIDADES */
-.modebar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  background:rgba(13,18,24,.92);
-  padding:10px;
-  border:2px solid var(--line);
-  border-radius:14px;
-  box-shadow:var(--shadow);
-  margin-bottom:12px;
-}
-
-.modebar button{
-  flex:1;
-  min-width:130px;
-  padding:12px 15px;
-  border:2px solid var(--line);
-  border-radius:10px;
-  background:#0a0e13;
-  color:#a0abb8;
-  font-weight:800;
-  transition:0.2s;
-}
-
-.modebar button.active{
-  background:var(--lime);
-  color:#05070a;
-  border-color:var(--lime);
-  box-shadow:0 0 18px rgba(184,255,0,.5);
-}
-
-.modebar button.locked{
-  opacity:.35;
-  filter:grayscale(1);
-  cursor:not-allowed;
-  pointer-events:none;
-}
-
-/* AVISO MARQUEE */
-.announcement{
-  overflow:hidden;
-  background:#040608;
-  border:2px solid #2a3644;
-  border-radius:10px;
-  margin-bottom:12px;
-  white-space:nowrap;
-}
-
-.marquee{
-  display:inline-block;
-  min-width:100%;
-  padding:9px 0 9px 100%;
-  animation:scroll 18s linear infinite;
-  color:var(--yellow);
-  font-weight:800;
-}
-
-@keyframes scroll{
-  from{transform:translateX(0)}
-  to{transform:translateX(-100%)}
-}
-
-/* PLACAR DISPLAY — PROPORÇÕES COMPACTADAS E AJUSTADAS */
-.scoreboard{
-  position:relative;
-  overflow:hidden;
-  background:linear-gradient(145deg,#0a0f15,#121822);
-  border:6px solid #00f0ff;
-  border-radius:20px;
-  padding:12px;
-  box-shadow:
-    0 10px 30px rgba(0, 240, 255, 0.4),
-    0 20px 60px rgba(0, 240, 255, 0.2),
-    inset 0 0 20px rgba(0, 240, 255, 0.12),
-    var(--shadow);
-}
-
-.matchhead{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:16px;
-  border-bottom:2px solid var(--line);
-  padding:0px 8px 8px;
-  text-align:center;
-}
-
-.matchname{
-  color:var(--cyan);
-  font-size:clamp(1rem,2vw,1.3rem);
   font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.sportlabel{
-  color:var(--muted);
-  font-weight:800;
-  font-size:.85rem;
-}
-
-.scoregrid{
-  display:grid;
-  grid-template-columns:1fr 90px 1fr;
-  align-items:center;
-  gap:14px;
-  padding:12px 8px;
-}
-
-.team-wrap{ min-width:0; }
-
-.team-name{
-  background:#06090d;
-  border:3px solid var(--cyan);
-  border-radius:10px 10px 0 0;
-  padding:6px 10px;
-  text-align:center;
-  box-shadow:0 0 15px rgba(0,240,255,.3), inset 0 0 10px rgba(0,240,255,.1);
-}
-
-.team-name.teamB-name{
-  border-color:var(--magenta);
-  box-shadow:0 0 15px rgba(255,0,160,.3), inset 0 0 10px rgba(255,0,160,.1);
-}
-
-.team-name input{
-  width:100%;
-  background:transparent;
-  border:0;
-  outline:none;
-  color:#fff;
-  text-align:center;
-  font-size:clamp(.85rem,1.3vw,1.1rem);
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-/* CAIXAS DOS TIMES RECOMPOSTAS (ALTURA E ESPAÇAMENTOS REDUZIDOS) */
-.team{
-  text-align:center;
-  background:#04070a;
-  border:5px solid var(--cyan);
-  border-top:0;
-  border-radius:0 0 14px 14px;
-  padding:10px 6px;
-  min-height:150px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  box-shadow:
-    0 8px 25px rgba(0, 240, 255, 0.35),
-    inset 0 0 20px rgba(0, 240, 255, 0.1);
-}
-
-.team.teamB{
-  border-color:var(--magenta);
-  box-shadow:
-    0 8px 25px rgba(255, 0, 160, 0.35),
-    inset 0 0 20px rgba(255, 0, 160, 0.1);
-}
-
-/* NÚMEROS DO PLACAR: EFEITO 3D MANTIDO COM TAMANHO OTIMIZADO PARA TELA CHEIA */
-.score{
-  font-family:'Impact', 'Arial Black', sans-serif;
-  font-size:clamp(5.5rem,12vw,11.5rem);
-  line-height:.8;
-  font-weight:1000;
-  letter-spacing:-0.02em;
-  color:#ffffff;
-  text-shadow:
-    1px 1px 0px #b0b0b0,
-    2px 2px 0px #909090,
-    3px 3px 0px #707070,
-    4px 4px 0px #505050,
-    5px 5px 0px #303030,
-    6px 6px 10px rgba(0,0,0,0.9),
-    0 0 18px rgba(255,255,255,0.8),
-    0 0 35px rgba(0,240,255,0.6);
-}
-
-.teamB .score{
-  text-shadow:
-    1px 1px 0px #b0b0b0,
-    2px 2px 0px #909090,
-    3px 3px 0px #707070,
-    4px 4px 0px #505050,
-    5px 5px 0px #303030,
-    6px 6px 10px rgba(0,0,0,0.9),
-    0 0 18px rgba(255,255,255,0.8),
-    0 0 35px rgba(255,0,160,0.6);
-}
-
-.versus{
-  font-size:1.8rem;
-  font-weight:1000;
-  color:#4a5768;
-  text-align:center;
-}
-
-.sets{
-  margin-top:8px;
-  color:var(--yellow);
-  font-weight:900;
-  font-family:'Courier New',monospace;
-  font-size:.95rem;
-}
-
-.clockbox{
-  text-align:center;
-  border-top:2px solid var(--line);
-  padding-top:8px;
-}
-
-/* CRONÔMETRO REDIMENSIONADO */
-.clock{
-  font-family:'Impact', 'Arial Black', sans-serif;
-  font-size:clamp(2.5rem,5.5vw,4.2rem);
-  font-weight:900;
-  color:#ffffff;
-  letter-spacing:1px;
-  line-height:1;
-  text-shadow:
-    1px 1px 0px #808080,
-    2px 2px 0px #505050,
-    3px 3px 0px #202020,
-    4px 4px 6px rgba(0,0,0,0.8),
-    0 0 20px rgba(0,240,255,0.7);
-}
-
-.period{
-  color:var(--yellow);
-  font-weight:900;
-  font-size:.95rem;
-  margin-top:2px;
-}
-
-.pause-indicator{
-  display:inline-block;
-  margin-top:4px;
-  padding:4px 12px;
-  border:2px solid var(--red);
-  border-radius:999px;
-  background:rgba(255,42,68,.15);
-  color:#ff6b7e;
-  font-weight:1000;
-  font-size:.75rem;
-}
-
-.live-strip{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-top:8px;
-}
-
-.live-strip span{
-  padding:4px 10px;
-  border:1px solid #222d3a;
-  border-radius:999px;
-  background:rgba(4,7,10,.8);
-  color:#8290a0;
-  font-size:.65rem;
-  font-weight:900;
-}
-
-.live-strip span:first-child{ color:var(--lime); }
-
-/* CONTROLE RÁPIDO */
-.quick-controls{
-  margin-top:16px;
-  background:var(--panel);
+  background:linear-gradient(135deg, #0e151d 0%, #162230 50%, #0a0e13 100%);
   border:2px solid var(--lime);
   border-radius:16px;
-  padding:16px;
-  box-shadow:0 0 22px rgba(184,255,0,.18);
+  padding:12px 24px;
+  box-shadow:0 0 30px rgba(184,255,0,.25), inset 0 0 15px rgba(184,255,0,.1);
+  display:inline-block;
+  position: relative;
 }
+.brand h1::after {
+  content: '';
+  position: absolute; inset: -2px; border-radius: 16px; border: 1px solid rgba(184,255,0,0.5);
+  filter: blur(4px); pointer-events: none;
+}
+.brand span{color:var(--lime); text-shadow: 0 0 12px rgba(184,255,0,0.5);}
+.status{
+  display:flex; gap:8px; align-items:center; color:var(--muted);
+  font-size:.9rem; font-weight:700; white-space:nowrap;
+}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime)}
+.modebar{
+  display:flex;flex-wrap:wrap;gap:8px;background:rgba(16,21,28,.92);
+  padding:10px;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-bottom:14px
+}
+.modebar button{
+  flex:1;min-width:130px;padding:13px 15px;border:1px solid var(--line);
+  border-radius:10px;background:#0c1117;color:#aeb8c4;font-weight:800
+}
+.modebar button.active{background:var(--lime);color:#080b0e;border-color:var(--lime)}
+.announcement{
+  overflow:hidden;background:#05070a;border:1px solid #33404e;border-radius:10px;
+  margin-bottom:16px;white-space:nowrap
+}
+.marquee{display:inline-block;min-width:100%;padding:11px 0 11px 100%;animation:scroll 18s linear infinite;color:var(--yellow);font-weight:800}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.scoreboard{
+  background:linear-gradient(145deg,#0d1218,#151c24);border:1px solid var(--line);
+  border-radius:22px;padding:18px;box-shadow:var(--shadow)
+}
+.matchhead{display:flex;justify-content:center;align-items:center;gap:20px;border-bottom:1px solid var(--line);padding:4px 8px 16px;text-align:center}
+.matchname{color:var(--cyan);font-size:clamp(1.1rem,2.4vw,1.6rem);font-weight:900;text-align:center;width:100%;text-transform:uppercase}
+.sportlabel{color:var(--muted);font-weight:700}
+.scoregrid{display:grid;grid-template-columns:minmax(0,1fr) 250px minmax(0,1fr);align-items:center;gap:18px;padding:20px 8px}
+.score-side{text-align:center}
+.team-name{
+  display:block;width:100%;margin:0 auto 12px;padding:14px 20px;
+  background:linear-gradient(135deg,#151e28,#0a0e13);
+  border:2px solid var(--cyan);border-radius:14px;
+  color:#fff;font-weight:1000;font-size:clamp(1.4rem,2.8vw,2.5rem);
+  letter-spacing:.04em;text-transform:uppercase;
+  text-shadow:0 0 8px rgba(0,217,255,.65),0 0 20px rgba(0,217,255,.25);
+  box-shadow:0 0 16px rgba(0,217,255,.18),inset 0 0 18px rgba(0,217,255,.06);
+}
+.team{text-align:center;background:#0a0e13;border:1px solid var(--line);border-radius:12px;padding:18px 14px}
+.team input{display:none}
 
-.quick-controls-title{
-  font-size:1rem;
+/* --- CLASSE SCORE (Geral/Painel Operador) --- */
+/* SOMBREAMENTO NEON REMOVIDO */
+.score{
+  font-family:'Orbitron', monospace;
+  font-size:clamp(8rem,16vw,15rem);
+  line-height:.82;
   font-weight:900;
+  letter-spacing:-.02em;
   color:var(--lime);
-  margin-bottom:12px;
-  text-transform:uppercase;
-  display:flex;
-  align-items:center;
-  gap:8px;
+  /* text-shadow: neon removido */;
 }
 
-.teams-control-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  margin-bottom:14px;
-}
+.center-score{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.versus{font-size:clamp(2rem,4vw,4rem);font-weight:1000;color:#667382;text-align:center}
 
-.controlcard{
-  background:var(--panel2);
-  border:var(--bw) solid var(--cyan);
-  border-radius:12px;
-  padding:12px;
-}
-
-.controlcard.cardB{ border-color:var(--magenta); }
-
-.controlcard h3{
-  margin-bottom:8px;
-  text-transform:uppercase;
-  font-size:.95rem;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.team-buttons{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:6px;
-}
-
-.btn{
-  border:0;
-  border-radius:8px;
-  padding:10px 12px;
-  font-weight:900;
-  transition:.15s;
-}
-
-.btn:hover{
-  transform:translateY(-2px);
-  filter:brightness(1.08);
-}
-
-.add{ background:var(--lime); color:#05070a; }
-.sub{ background:var(--red); color:#fff; }
-.blue{ background:var(--cyan); color:#020b0e; }
-.dark{ background:#1c2530; color:#fff; border:1px solid #323d4a; }
-.yellow{ background:var(--yellow); color:#111; }
-
-.timer-quick-bar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  padding-top:12px;
-  border-top:1px solid var(--line);
-}
-
-.timer-quick-bar .btn{
-  flex:1;
-  min-width:130px;
-}
-
-/* PAINEL ADMIN DE CONFIGURAÇÕES */
-.admin{
-  margin-top:16px;
-  background:var(--panel);
-  border:2px solid var(--line);
-  border-radius:16px;
-  padding:16px;
-}
-
-.admin h2{
-  margin-bottom:14px;
-  color:var(--muted);
-  font-size:1.1rem;
-}
-
-.fields{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.field label{
-  display:block;
-  color:var(--muted);
-  font-size:.85rem;
-  margin-bottom:6px;
-}
-
-.field input,
-.field select{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid var(--line);
-  background:#06090d;
-  color:#fff;
-  outline:none;
-}
-
-.action-buttons{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+/* --- CLASSE SETS (Geral/Painel Operador) --- */
+/* SOMBREAMENTO NEON REMOVIDO */
+.sets{
   margin-top:14px;
-}
-
-.reset, .end-match{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
+  color:var(--yellow);
   font-weight:900;
+  font-family:'Orbitron', monospace;
+  font-size:1.25rem;
+  /* text-shadow: neon removido */;
 }
 
-.reset{ border:2px solid var(--red); background:#260a10; color:#ff6b7e; }
-.end-match{ border:2px solid var(--yellow); background:#332800; color:var(--yellow); }
+.clockbox{text-align:center;border:2px solid rgba(0,217,255,.55);border-radius:14px;padding:12px 18px;background:#050a10;box-shadow:0 0 20px rgba(0,217,255,.14),inset 0 0 18px rgba(0,217,255,.05);width:100%}
 
-.open-score-group{
-  display:flex;
-  gap:10px;
-  margin:12px 0;
+/* --- CLASSE CLOCK (Geral/Painel Operador) --- */
+/* SOMBREAMENTO NEON REMOVIDO */
+.clock{
+  font-family:'Orbitron', monospace;
+  font-size:clamp(3.5rem,7vw,7rem);
+  font-weight:1000;
+  color:var(--cyan);
+  /* text-shadow: neon removido */;
 }
 
-.open-score, .fullscreen-btn{
-  flex:1;
-  padding:14px;
-  border:0;
-  border-radius:10px;
-  font-weight:900;
+.period{color:var(--yellow);font-weight:1000;font-size:1.35rem;margin-top:6px}
+.controls{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.controlcard{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:16px}
+.controlcard h3{margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+#setsCtrlA .btn,#setsCtrlB .btn{font-size:1.25rem;min-height:52px;padding:13px 18px}
+.direct-input{
+  display:flex;gap:8px;margin-top:10px;align-items:center;
+  background:#090d12;padding:8px;border-radius:10px;border:1px solid var(--line);
+}
+.direct-input label{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.direct-input input{
+  width:70px;background:#151c25;border:1px solid var(--line);
+  color:#fff;border-radius:6px;padding:6px;text-align:center;font-weight:800;
+}
+.btn{
+  border:0;border-radius:9px;padding:11px 15px;font-weight:900;transition:.15s;flex:1;min-width:60px;
+}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.add{background:var(--lime);color:#080b0e}
+.sub{background:var(--red);color:#fff}
+.blue{background:var(--cyan);color:#031014}
+.dark{background:#202934;color:#fff;border:1px solid #3a4653}
+.yellow{background:var(--yellow);color:#111}
+.admin{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+.admin h2{margin-bottom:15px;color:var(--lime)}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.field label{display:block;color:var(--muted);font-size:.85rem;margin-bottom:6px}
+.field input,.field select{
+  width:100%;padding:11px;border-radius:9px;border:1px solid var(--line);
+  background:#080c11;color:#fff;outline:none}
+.timer-adjust{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+.reset{margin-top:14px;width:100%;padding:15px;border:1px solid var(--red);background:#260f14;color:#ff7180;border-radius:10px;font-weight:900}
+.hidden{display:none!important}
+
+@media(max-width:850px){
+  .topbar{flex-direction:column;gap:10px}
+  .scoregrid{grid-template-columns:1fr;gap:16px}
+  .center-score{order:2}
+  .score-side{order:1}
+  .score-side:last-child{order:3}
+  .versus{font-size:1.8rem}
+  .score{font-size:7rem}
+  .controls,.fields{grid-template-columns:1fr}
+  .matchhead{align-items:start;flex-direction:column}
 }
 
-.open-score{
-  background:linear-gradient(90deg,#b8ff00,#d8ff68);
-  color:#050700;
-  box-shadow:0 0 20px rgba(184,255,0,.3);
-}
-
-.fullscreen-btn{
-  background:linear-gradient(90deg,#00f0ff,#70f6ff);
-  color:#020b0e;
-  box-shadow:0 0 20px rgba(0,240,255,.3);
-}
-
-.window-note{
-  padding:10px 12px;
-  border:1px solid #222d3a;
-  border-radius:8px;
-  color:#8290a0;
-  background:#080c11;
-  font-size:.85rem;
-  line-height:1.4;
-}
-
-.hidden{ display:none!important; }
-
-/* MODO TELA SECUNDÁRIA / TELA CHEIA (TUDO AJUSTADO PARA ENTRAR EM 100% DA TELA SEM SCROLL) */
-body.score-screen{ padding:0; background:#010204; overflow:hidden; }
-body.score-screen .app{ max-width:none; width:100vw; height:100vh; display:flex; flex-direction:column; justify-content:space-between; }
-body.score-screen .operator-only,
-body.score-screen .modebar,
-body.score-screen .quick-controls,
-body.score-screen .admin{ display:none!important; }
-body.score-screen .topbar{ margin:0; border-radius:0; padding:6px 20px; border-width:0 0 2px 0; }
-body.score-screen .announcement{ margin:0; border-radius:0; border-width:1px 0; }
-
+/* --- ESTILIZAÇÃO CUSTOMIZADA PARA TELA DE PLACAR PROFISSIONAL (SCORE-SCREEN) --- */
+body.score-screen{padding:0;background:#020408;overflow:hidden}
+body.score-screen .operator-only{display:none!important}
+body.score-screen .app{max-width:none;width:100vw;height:100vh}
+body.score-screen .topbar{padding:10px 28px;margin:0;background:#070b10;border-bottom:1px solid #26313c}
+body.score-screen .modebar{display:none}
+body.score-screen .announcement{margin:0;border-radius:0;border-left:0;border-right:0}
 body.score-screen .scoreboard{
-  flex:1;
-  width:calc(100vw - 20px);
-  margin:8px auto;
-  border-width:6px;
-  border-radius:20px;
-  padding:10px 20px;
+  height:calc(100vh - 100px);
+  border:0;
+  border-radius:0;
+  padding:5px 28px 15px;
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
-  box-shadow:
-    0 10px 30px rgba(0, 240, 255, 0.45),
-    0 20px 60px rgba(0, 240, 255, 0.25),
-    inset 0 0 25px rgba(0, 240, 255, 0.15);
+  justify-content:flex-start;
+  gap:10px;
 }
-
-body.score-screen .scoregrid{ 
-  flex:1; 
-  grid-template-columns:1fr 110px 1fr; 
-  padding:5px 1vw; 
+body.score-screen .matchhead{padding:0px 12px 6px;text-align:center;border-bottom:none}
+body.score-screen .matchname{
+  font-size:clamp(1.8rem,3.2vw,3.5rem);
+  letter-spacing:.06em;
+  text-shadow: none; /* Glow removido dos títulos também se necessário, ou manter conforme original: text-shadow:0 0 15px rgba(0,217,255,.5), 0 0 30px rgba(0,217,255,.2); */
+}
+body.score-screen .sportlabel{display:none!important;}
+body.score-screen .announcement{min-height:55px}
+body.score-screen .marquee{
+  font-size:clamp(1.3rem,2.2vw,2.2rem);
+  padding:12px 0 12px 100%;
+  letter-spacing:.03em;
+  text-shadow: none; /* Glow removido da marquise conforme original: text-shadow:0 0 12px rgba(255,212,59,.6); */
+}
+body.score-screen .scoregrid{
+  grid-template-columns:1fr 200px 1fr;
+  padding:0vw 1vw;
   align-items:center;
+  gap:2vw;
+  margin-top:-5px;
+}
+body.score-screen .team-name{
+  font-size:clamp(2rem,3.5vw,4.2rem);
+  padding:14px 20px;
+  margin-bottom:10px;
+  border-width:2px;
+  text-shadow: none; /* Glow removido conforme original: text-shadow:0 0 8px rgba(0,217,255,.65),0 0 20px rgba(0,217,255,.25); */
+  box-shadow: 0 0 25px rgba(0,217,255,.25), inset 0 0 20px rgba(0,217,255,.1);
+}
+body.score-screen .team{
+  background: #020509;
+  border: 2px solid #1a2634;
+  padding: 18px 10px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5);
 }
 
-body.score-screen .team{ 
-  min-height:0; 
-  height:100%; 
-  max-height:calc(100vh - 240px);
-  border-width:5px; 
-  padding:5px;
+/* FONTE CALCULADORA / LED ELETRÔNICO - SEM GLOW NEON */
+body.score-screen .score{
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(12rem, 24vw, 28rem);
+  line-height: .72;
+  font-weight: 900;
+  letter-spacing: 0em;
+  color: var(--lime);
+  /* text-shadow: neon removido */;
 }
 
-body.score-screen .team-name input{ font-size:clamp(1rem,1.8vw,1.8rem); }
-body.score-screen .score{ font-size:clamp(6rem,15vw,14rem); }
-body.score-screen .clock{ font-size:clamp(3rem,6vw,5rem); }
+body.score-screen .versus{
+  font-size:clamp(2.5rem,4vw,5rem);
+  text-shadow: none; /* Glow removido conforme original: text-shadow: 0 0 15px rgba(255,255,255,0.2); */
+}
+body.score-screen .center-score{gap:10px}
 
-/* RESPONSIVIDADE */
-@media(max-width:850px){
-  body{ padding:8px; }
-  .topbar{ padding:10px; }
-  .topbar-spacer{ display:none; }
-  .status{ width:auto; }
-  .brand h1{ font-size:1.15rem; padding:8px 12px; }
-  .scoreboard{ border-width:5px; padding:10px; }
-  .scoregrid{ grid-template-columns:1fr; gap:10px; }
-  .versus{ order:2; }
-  .team-wrap:first-child{ order:1; }
-  .team-wrap:last-child{ order:3; }
-  .team{ min-height:140px; border-width:4px; }
-  .score{ font-size:5.5rem; }
-  .teams-control-grid, .fields, .action-buttons, .open-score-group{ grid-template-columns:1fr; flex-direction:column; }
-  body.score-screen .scoregrid{ grid-template-columns:1fr; }
-  body.score-screen .team{ min-height:140px; }
+/* PERÍODO / SET POSICIONADO LOGO ABAIXO DE "VS" */
+body.score-screen .period-center {
+  font-size: clamp(1.4rem, 2.5vw, 2.6rem);
+  font-weight: 1000;
+  color: var(--yellow);
+  text-transform: uppercase;
+  text-align: center;
+  background: rgba(255, 212, 59, 0.08);
+  border: 1px solid rgba(255, 212, 59, 0.4);
+  border-radius: 10px;
+  padding: 6px 12px;
+  margin-top: 8px;
+  letter-spacing: 1px;
+  box-shadow: 0 0 20px rgba(255, 212, 59, 0.25);
+  width: 100%;
+}
+
+/* FONTE DOS SETS (VÔLEI) - SEM GLOW NEON */
+body.score-screen .sets {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2rem, 3.8vw, 3.8rem);
+  margin-top: 15px;
+  letter-spacing: 2px;
+  text-shadow: none; /* text-shadow: 0 0 15px rgba(255,212,59,0.8), 0 0 30px rgba(255,212,59,0.4); neon removido */
+}
+
+/* CRONÔMETRO DIGITADO RETRÔ */
+body.score-screen .clockbox{
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  min-width: 480px;
+  border: 3px solid rgba(0,217,255,.9);
+  padding: 12px 45px;
+  background: #02060c;
+  box-shadow: 0 0 40px rgba(0,217,255,.4), inset 0 0 30px rgba(0,217,255,.2);
+  border-radius: 20px;
+  z-index: 100;
+}
+
+/* RELÓGIO - SEM GLOW NEON */
+body.score-screen .clock{
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(5.5rem, 9.5vw, 10rem);
+  line-height: 0.88;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  /* text-shadow: neon removido */;
+}
+
+body.score-screen .clockbox .period {
+  display: none !important;
+}
+
+body.score-screen .controls{display:none}
+body.score-screen .admin{display:none}
+body.operator-screen .scoreboard{display:none}
+body.operator-screen .announcement{display:none}
+body.operator-screen .modebar{display:flex}
+body.operator-screen .admin{display:block}
+
+/* PAINEL DO OPERADOR */
+body.operator-screen .modebar button{
+  font-size:clamp(1.15rem,2vw,1.7rem);
+  padding:18px 20px;
+  min-height:64px;
+}
+body.operator-screen .admin h2{font-size:clamp(1.5rem,2.5vw,2.1rem)}
+body.operator-screen .field label{font-size:clamp(1rem,1.5vw,1.25rem);font-weight:800}
+body.operator-screen .field input,body.operator-screen .field select{font-size:clamp(1.05rem,1.6vw,1.35rem);padding:15px}
+body.operator-screen .btn{font-size:clamp(1rem,1.5vw,1.3rem);padding:15px 18px;min-height:52px}
+body.operator-screen .open-score{font-size:clamp(1.1rem,1.8vw,1.5rem);padding:18px}
+.open-score{
+  display:block;width:100%;margin:0 0 14px;padding:15px 18px;border:0;border-radius:12px;
+  background:linear-gradient(90deg,#b8ff00,#d8ff68);color:#050700;font-size:1rem;font-weight:900}
+.window-note{
+  margin-top:10px;padding:12px;border:1px solid #26313d;border-radius:10px;
+  color:#91a0af;background:#0b1016;font-size:.9rem;line-height:1.4}
+.admin-teams-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px}
+.admin-team-box{background:#080c11;border:1px solid var(--line);border-radius:12px;padding:14px}
+.admin-team-title{font-size:0.95rem;color:var(--cyan);font-weight:900;text-transform:uppercase;margin-bottom:8px}
+.admin-buttons-row{display:flex;gap:6px;margin-bottom:10px}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+.blink-icon {
+  animation: blink 1s linear infinite;
+  margin-right: 8px;
+}
+.static-icon {
+  margin-right: 8px;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: grayscale(0.5);
 }
 </style>
 </head>
-
 <body>
-
 <div class="app">
-
-<header class="topbar">
-  <div class="topbar-spacer"></div>
-  <div class="brand">
-    <h1>🏆 JOGOS <span>ESTUDANTIS 2026</span></h1>
-  </div>
-  <div class="status">
-    <i class="dot"></i> PLACAR AO VIVO
-  </div>
-</header>
-
-<nav class="modebar" id="modalidades">
-  <button data-sport="Futsal" class="active">⚽ FUTSAL</button>
-  <button data-sport="Voleibol">🏐 VÔLEI</button>
-  <button data-sport="Handebol">🤾 HANDEBOL</button>
-  <button data-sport="Baleado">🎯 BALEADO</button>
-  <button data-sport="Basquete">🏀 BASQUETE</button>
-</nav>
-
-<div class="announcement">
-  <div class="marquee" id="avisoTela">
-    BEM-VINDOS AOS JOGOS ESTUDANTIS 2026 • BOA PARTIDA A TODOS!
-  </div>
-</div>
-
-<!-- DISPLAY DO PLACAR COM PROPORÇÕES REVISADAS -->
-<main class="scoreboard">
-  <div class="matchhead">
-    <div>
-      <div class="matchname" id="nomeJogo">FASE DE GRUPOS</div>
-      <div class="sportlabel" id="esporteTela">FUTSAL</div>
+  <header class="topbar">
+    <div style="width: 140px;" class="operator-only"></div>
+    <div class="brand"><h1>🏆 JOGOS <span>ESTUDANTIS 2026</span></h1></div>
+    <div class="status"><i class="dot"></i> PLACAR AO VIVO</div>
+  </header>
+  <nav class="modebar" id="modalidades">
+    <button data-sport="Futsal" class="active">⚽ FUTSAL</button>
+    <button data-sport="Voleibol">🏐 VÔLEI</button>
+    <button data-sport="Handebol">🤾 HANDEBOL</button>
+    <button data-sport="Baleado">🎯 BALEADO</button>
+    <button data-sport="Basquete">🏀 BASQUETE</button>
+  </nav>
+  <div class="announcement"><div class="marquee" id="avisoTela">BEM-VINDOS AOS JOGOS ESTUDANTIS 2026 • BOA PARTIDA A TODOS!</div></div>
+  <main class="scoreboard">
+    <div class="matchhead">
+      <div><div class="matchname" id="nomeJogo">FASE DE GRUPOS</div><div class="sportlabel" id="esporteTela">FUTSAL</div></div>
     </div>
-  </div>
-
-  <section class="scoregrid">
-    <!-- TIME A -->
-    <div class="team-wrap">
-      <div class="team-name">
-        <input id="nomeA" value="TIME DA CASA">
+    <section class="scoregrid">
+      <div class="score-side">
+        <div class="team-name" id="nomeA">TIME DA CASA</div>
+        <div class="team">
+          <div class="score" id="pontosA">0</div>
+          <div class="sets hidden" id="setsA">SETS: 0</div>
+        </div>
       </div>
-      <div class="team">
-        <div class="score" id="pontosA">0</div>
-        <div class="sets hidden" id="setsA">SETS: 0</div>
+      <div class="center-score">
+        <div class="versus">VS</div>
+        <!-- PERÍODO/SET POSICIONADO ABAIXO DE VS -->
+        <div class="period-center" id="periodoCentro">1º TEMPO</div>
+      </div>
+      <div class="score-side">
+        <div class="team-name" id="nomeB">VISITANTE</div>
+        <div class="team">
+          <div class="score" id="pontosB">0</div>
+          <div class="sets hidden" id="setsB">SETS: 0</div>
+        </div>
+      </div>
+    </section>
+    <div class="clockbox" id="clockBox">
+      <div class="clock" id="clock">20:00</div>
+      <div class="period" id="periodo">1º TEMPO</div>
+    </div>
+    <div class="controls">
+      <div class="controlcard">
+        <h3 id="tituloA">TIME DA CASA</h3>
+        <div class="row">
+          <button class="btn sub" onclick="addScore('A',-1)">−1</button>
+          <button class="btn add" onclick="addScore('A',1)">+1</button>
+          <button class="btn add" onclick="addScore('A',2)">+2</button>
+          <button class="btn add" onclick="addScore('A',3)">+3</button>
+        </div>
+        <div class="direct-input">
+          <label>INSERIR PLACAR:</label>
+          <input type="number" id="directScoreA" min="0" value="0">
+          <button class="btn blue" onclick="setDirectScore('A')">DEFINIR</button>
+        </div>
+        <div class="row" id="setsCtrlA" style="margin-top:8px"></div>
+      </div>
+      <div class="controlcard">
+        <h3 id="tituloB">VISITANTE</h3>
+        <div class="row">
+          <button class="btn sub" onclick="addScore('B',-1)">−1</button>
+          <button class="btn add" onclick="addScore('B',1)">+1</button>
+          <button class="btn add" onclick="addScore('B',2)">+2</button>
+          <button class="btn add" onclick="addScore('B',3)">+3</button>
+        </div>
+        <div class="direct-input">
+          <label>INSERIR PLACAR:</label>
+          <input type="number" id="directScoreB" min="0" value="0">
+          <button class="btn blue" onclick="setDirectScore('B')">DEFINIR</button>
+        </div>
+        <div class="row" id="setsCtrlB" style="margin-top:8px"></div>
       </div>
     </div>
-
-    <div class="versus">VS</div>
-
-    <!-- TIME B -->
-    <div class="team-wrap">
-      <div class="team-name teamB-name">
-        <input id="nomeB" value="VISITANTE">
+  </main>
+  <div class="operator-only">
+    <button class="open-score" onclick="abrirTelaPlacar()">🖥️ ABRIR TELA DO PAINEL ELETRÔNICO</button>
+    <div class="window-note">
+      <strong>Modo profissional:</strong> esta janela é o <strong>Painel de Controle</strong>.
+      O botão acima abre uma segunda janela somente com o placar eletrônico.
+      Deixe a segunda janela na TV/projetor e mantenha esta janela no computador do operador.    </div>
+  </div>
+  <section class="admin">
+    <h2>⚙ PAINEL DE CONTROLE</h2>
+    <div class="admin-teams-grid">
+      <div class="admin-team-box">
+        <div class="admin-team-title" id="adminLabelA">EQUIPE A</div>
+        <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 4px;">Placar (Pontos):</div>
+        <div class="admin-buttons-row">
+          <button class="btn sub" onclick="addScore('A',-1)">−1</button>
+          <button class="btn add" onclick="addScore('A',1)">+1</button>
+          <button class="btn add" onclick="addScore('A',2)">+2</button>
+          <button class="btn add" onclick="addScore('A',3)">+3</button>
+        </div>
+        <div id="adminSetsBoxA" class="hidden" style="margin-top: 8px;">
+          <div style="font-size: 0.8rem; color: var(--yellow); margin-bottom: 4px;">Controle de Sets (Vôlei):</div>
+          <div class="admin-buttons-row">
+            <button class="btn dark" onclick="changeSet('A',-1)">− SET</button>
+            <button class="btn yellow" onclick="changeSet('A',1)">+ SET</button>
+          </div>
+        </div>
       </div>
-      <div class="team teamB">
-        <div class="score" id="pontosB">0</div>
-        <div class="sets hidden" id="setsB">SETS: 0</div>
+      <div class="admin-team-box">
+        <div class="admin-team-title" id="adminLabelB">EQUIPE B</div>
+        <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 4px;">Placar (Pontos):</div>
+        <div class="admin-buttons-row">
+          <button class="btn sub" onclick="addScore('B',-1)">−1</button>
+          <button class="btn add" onclick="addScore('B',1)">+1</button>
+          <button class="btn add" onclick="addScore('B',2)">+2</button>
+          <button class="btn add" onclick="addScore('B',3)">+3</button>
+        </div>
+        <div id="adminSetsBoxB" class="hidden" style="margin-top: 8px;">
+          <div style="font-size: 0.8rem; color: var(--yellow); margin-bottom: 4px;">Controle de Sets (Vôlei):</div>
+          <div class="admin-buttons-row">
+            <button class="btn dark" onclick="changeSet('B',-1)">− SET</button>
+            <button class="btn yellow" onclick="changeSet('B',1)">+ SET</button>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
-
-  <div class="clockbox" id="clockBox">
-    <div class="clock" id="clock">20:00</div>
-    <div class="period" id="periodo">1º TEMPO</div>
-    <div class="pause-indicator hidden" id="pauseIndicator">⏸ PARTIDA PAUSADA</div>
-  </div>
-
-  <div class="live-strip">
-    <span>● AO VIVO</span>
-    <span>⚡ ATUALIZAÇÃO AUTOMÁTICA</span>
-    <span>🖥️ TELA ELETRÔNICA FULLSCREEN</span>
-  </div>
-</main>
-
-<!-- PAINEL DE CONTROLE RÁPIDO -->
-<section class="quick-controls operator-only">
-  <div class="quick-controls-title">🎮 CONTROLE RÁPIDO DA PARTIDA</div>
-
-  <div class="teams-control-grid">
-    <!-- CONTROLES TIME A -->
-    <div class="controlcard">
-      <h3 id="tituloA">TIME DA CASA</h3>
-      <div class="team-buttons">
-        <button class="btn sub" onclick="addScore('A',-1)">−1</button>
-        <button class="btn add" onclick="addScore('A',1)">+1</button>
-        <button class="btn add" onclick="addScore('A',2)">+2</button>
-      </div>
-      <button class="btn blue" style="width:100%;margin-top:6px" onclick="setScore('A')">✏️ INSERIR</button>
-      <div class="row" id="setsCtrlA" style="margin-top:6px"></div>
+    <div class="fields">
+      <div class="field"><label>Nome da partida / fase</label><input id="inputJogo" value="Fase de Grupos"></div>
+      <div class="field"><label>Aviso em movimento</label><input id="inputAviso" value="BEM-VINDOS AOS JOGOS ESTUDANTIS 2026 • BOA PARTIDA A TODOS!"></div>
+      <div class="field"><label>Modalidade</label><select id="selectEsporte"></select></div>
+      <div class="field"><label>Time A</label><input id="inputA" value="Time da Casa"></div>
+      <div class="field"><label>Time B</label><input id="inputB" value="Visitante"></div>
+      <div class="field"><label>Tempo inicial (minutos)</label><input id="minInicial" type="number" min="0" value="20"></div>
+      <div class="field"><label>Tipo de cronômetro</label><select id="tipoTempo"><option value="decrescente">DECRESCENTE</option><option value="crescente">CRESCENTE</option></select></div>
     </div>
-
-    <!-- CONTROLES TIME B -->
-    <div class="controlcard cardB">
-      <h3 id="tituloB">VISITANTE</h3>
-      <div class="team-buttons">
-        <button class="btn sub" onclick="addScore('B',-1)">−1</button>
-        <button class="btn add" onclick="addScore('B',1)">+1</button>
-        <button class="btn add" onclick="addScore('B',2)">+2</button>
-      </div>
-      <button class="btn blue" style="width:100%;margin-top:6px" onclick="setScore('B')">✏️ INSERIR</button>
-      <div class="row" id="setsCtrlB" style="margin-top:6px"></div>
+    <div class="timer-adjust" id="timerControls">
+      <button class="btn add" id="btnStart" onclick="startTimer()">
+          <span id="startIcon" class="static-icon">▶</span> <span id="startText">INICIAR</span>
+      </button>
+      <button class="btn sub" id="btnPause" onclick="pauseTimer()" disabled>
+          <span class="static-icon">⏸</span> PAUSAR
+      </button>
+      <button class="btn blue" onclick="adjustTime(60)">+1 MIN</button>
+      <button class="btn blue" onclick="adjustTime(-60)">−1 MIN</button>
+      <button class="btn yellow" onclick="nextPeriod()">PRÓXIMO TEMPO</button>
     </div>
-  </div>
-
-  <!-- CONTROLES DO CRONÔMETRO -->
-  <div class="timer-quick-bar">
-    <button class="btn add" id="startBtn" onclick="startMatch()">▶ INICIAR PARTIDA</button>
-    <button class="btn sub" id="pauseBtn" onclick="togglePause()">⏸ PAUSAR</button>
-    <button class="btn blue" onclick="adjustTime(60)">+1 MIN</button>
-    <button class="btn blue" onclick="adjustTime(-60)">−1 MIN</button>
-    <button class="btn yellow" onclick="nextPeriod()">PRÓXIMO TEMPO</button>
-  </div>
-</section>
-
-<div class="operator-only">
-  <div class="open-score-group">
-    <button class="open-score" onclick="abrirTelaPlacar()">🖥️ ABRIR EM NOVA JANELA</button>
-    <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ TELA CHEIA (FULLSCREEN)</button>
-  </div>
-  <div class="window-note">
-    <strong>Modo Profissional:</strong> Você pode usar a opção <strong>Tela Cheia</strong> para transformar esta tela em monitor único, ou <strong>Abrir em Nova Janela</strong> para arrastar a projeção para a TV/Telão mantendo o controle nesta tela.
-  </div>
-</div>
-
-<!-- CONFIGURAÇÕES E PARÂMETROS DA PARTIDA -->
-<section class="admin operator-only">
-  <h2>⚙ PARÂMETROS E CONFIGURAÇÕES DA PARTIDA</h2>
-
-  <div class="fields">
-    <div class="field">
-      <label>Nome da partida / fase</label>
-      <input id="inputJogo" value="Fase de Grupos">
-    </div>
-
-    <div class="field">
-      <label>Aviso em movimento</label>
-      <input id="inputAviso" value="BEM-VINDOS AOS JOGOS ESTUDANTIS 2026 • BOA PARTIDA A TODOS!">
-    </div>
-
-    <div class="field">
-      <label>Modalidade</label>
-      <select id="selectEsporte"></select>
-    </div>
-
-    <div class="field">
-      <label>Time A</label>
-      <input id="inputA" value="Time da Casa">
-    </div>
-
-    <div class="field">
-      <label>Time B</label>
-      <input id="inputB" value="Visitante">
-    </div>
-
-    <div class="field">
-      <label>Tempo inicial (minutos)</label>
-      <input id="minInicial" type="number" min="0" value="20">
-    </div>
-
-    <div class="field">
-      <label>Tipo de cronômetro</label>
-      <select id="tipoTempo">
-        <option value="decrescente">DECRESCENTE</option>
-        <option value="crescente">CRESCENTE</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="action-buttons">
-    <button class="end-match" onclick="endMatch()">■ ENCERRAR PARTIDA / LIBERAR MODALIDADES</button>
     <button class="reset" onclick="resetAll()">↻ REINICIAR PARTIDA / ZERAR TUDO</button>
-  </div>
-</section>
-
+  </section>
 </div>
-
-<script>
-const SPORTS=["Futsal","Voleibol","Handebol","Baleado","Basquete"];
-const STORAGE="placar-estudantil-profissional-2026";
-const CHANNEL="placar-estudantil-canal-2026";
-
-let state={
-  sport:"Futsal",
-  game:"Fase de Grupos",
-  notice:"BEM-VINDOS AOS JOGOS ESTUDANTIS 2026 • BOA PARTIDA A TODOS!",
-  a:"Time da Casa",
-  b:"Visitante",
-  scoreA:0,
-  scoreB:0,
-  setsA:0,
-  setsB:0,
-  seconds:1200,
-  running:false,
-  matchStarted:false,
-  period:1,
-  timeMode:"decrescente"
-};
-
-let timer=null;
-let channel=null;
-
-try{
-  channel=new BroadcastChannel(CHANNEL);
-  channel.onmessage=(e)=>{
-    if(e.data && e.data.type==="STATE"){
-      state={ ...state, ...e.data.state };
-      render();
-    }
-  };
-}catch(e){}
-
-function save(){
-  localStorage.setItem(STORAGE, JSON.stringify(state));
-  if(channel){
-    channel.postMessage({ type:"STATE", state });
-  }
-}
-
-function load(){
-  try{
-    const s=JSON.parse(localStorage.getItem(STORAGE));
-    if(s) state={ ...state, ...s };
-  }catch(e){}
-  state.running=false;
-}
-
-function formatTime(s){
-  s=Math.max(0, Math.floor(s));
-  return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
-}
-
-/* RENDERIZADOR DO DOM */
-function render(){
-  document.getElementById("nomeJogo").textContent=state.game.toUpperCase();
-  document.getElementById("esporteTela").textContent=state.sport.toUpperCase();
-  document.getElementById("avisoTela").textContent=state.notice;
-  
-  document.getElementById("nomeA").value=state.a.toUpperCase();
-  document.getElementById("nomeB").value=state.b.toUpperCase();
-  document.getElementById("tituloA").textContent=state.a.toUpperCase();
-  document.getElementById("tituloB").textContent=state.b.toUpperCase();
-  
-  document.getElementById("pontosA").textContent=state.scoreA;
-  document.getElementById("pontosB").textContent=state.scoreB;
-  document.getElementById("setsA").textContent="SETS: "+state.setsA;
-  document.getElementById("setsB").textContent="SETS: "+state.setsB;
-  
-  document.getElementById("clock").textContent=formatTime(state.seconds);
-  document.getElementById("periodo").textContent=state.sport==="Voleibol" ? state.period+"º SET" : state.period+"º TEMPO";
-
-  document.getElementById("inputJogo").value=state.game;
-  document.getElementById("inputAviso").value=state.notice;
-  document.getElementById("inputA").value=state.a;
-  document.getElementById("inputB").value=state.b;
-  document.getElementById("selectEsporte").value=state.sport;
-  document.getElementById("tipoTempo").value=state.timeMode;
-
-  const volei = state.sport==="Voleibol";
-  document.getElementById("setsA").classList.toggle("hidden",!volei);
-  document.getElementById("setsB").classList.toggle("hidden",!volei);
-  document.getElementById("clockBox").classList.toggle("hidden",volei);
-
-  const setControlsHtml = volei ? `
-    <div style="display:flex; gap:4px; margin-top:4px;">
-      <button class="btn dark" style="flex:1" onclick="changeSet('TEAM',-1)">− SET</button>
-      <button class="btn yellow" style="flex:1" onclick="changeSet('TEAM',1)">+ SET</button>
-    </div>` : "";
-
-  document.getElementById("setsCtrlA").innerHTML = setControlsHtml.replace(/TEAM/g, 'A');
-  document.getElementById("setsCtrlB").innerHTML = setControlsHtml.replace(/TEAM/g, 'B');
-
-  const startBtn = document.getElementById("startBtn");
-  startBtn.disabled = state.running;
-  startBtn.textContent = state.running ? "▶ EM ANDAMENTO" : "▶ INICIAR PARTIDA";
-
-  const pauseBtn = document.getElementById("pauseBtn");
-  pauseBtn.disabled = !state.matchStarted;
-  pauseBtn.textContent = state.running ? "⏸ PAUSAR" : "▶ DESPAUSAR";
-
-  document.getElementById("pauseIndicator").classList.toggle("hidden", !state.matchStarted || state.running);
-
-  document.querySelectorAll("#modalidades button").forEach(btn=>{
-    const atual = btn.dataset.sport===state.sport;
-    btn.classList.toggle("active", atual);
-    btn.disabled = state.matchStarted;
-    btn.classList.toggle("locked", state.matchStarted);
-  });
-}
-
-function updateClockOnly(){
-  document.getElementById("clock").textContent = formatTime(state.seconds);
-  save();
-}
-
-function addScore(team,valor){
-  if(team==="A") state.scoreA = Math.max(0, state.scoreA+valor);
-  else state.scoreB = Math.max(0, state.scoreB+valor);
-  save(); render();
-}
-
-function setScore(team){
-  const atual = team==="A" ? state.scoreA : state.scoreB;
-  const nome = team==="A" ? state.a : state.b;
-  const valor = prompt("Digite o placar de "+nome, atual);
-  if(valor===null) return;
-  const numero = Number(valor);
-  if(Number.isInteger(numero) && numero>=0){
-    if(team==="A") state.scoreA=numero; else state.scoreB=numero;
-    save(); render();
-  }
-}
-
-function changeSet(team,valor){
-  if(team==="A") state.setsA = Math.max(0, state.setsA+valor);
-  else state.setsB = Math.max(0, state.setsB+valor);
-  save(); render();
-}
-
-function startMatch(){
-  if(timer) return;
-  state.running=true;
-  state.matchStarted=true;
-  save(); render();
-
-  timer = setInterval(()=>{
-    if(state.timeMode==="crescente"){
-      state.seconds++;
-      updateClockOnly();
-    } else {
-      if(state.seconds <= 0){
-        clearInterval(timer); timer=null;
-        state.running=false;
-        save(); render();
-        return;
-      }
-      state.seconds--;
-      updateClockOnly();
-    }
-  },1000);
-}
-
-function togglePause(){
-  if(!state.matchStarted) return;
-  if(timer){
-    clearInterval(timer); timer=null;
-    state.running=false;
-  } else {
-    state.running=true;
-    timer = setInterval(()=>{
-      if(state.timeMode==="crescente"){
-        state.seconds++;
-        updateClockOnly();
-      } else {
-        if(state.seconds <= 0){
-          clearInterval(timer); timer=null;
-          state.running=false;
-          save(); render();
-          return;
-        }
-        state.seconds--;
-        updateClockOnly();
-      }
-    },1000);
-  }
-  save(); render();
-}
-
-function adjustTime(segundos){
-  state.seconds = Math.max(0, state.seconds+segundos);
-  save(); render();
-}
-
-function nextPeriod(){
-  state.period++;
-  if(state.sport!=="Voleibol"){
-    state.seconds = state.timeMode==="crescente" ? 0 : Number(document.getElementById("minInicial").value||20)*60;
-  }
-  save(); render();
-}
-
-function endMatch(){
-  if(timer){ clearInterval(timer); timer=null; }
-  state.running=false;
-  state.matchStarted=false;
-  save(); render();
-}
-
-function resetAll(){
-  if(timer){ clearInterval(timer); timer=null; }
-  state.scoreA=0; state.scoreB=0; state.setsA=0; state.setsB=0;
-  state.period=1; state.running=false; state.matchStarted=false;
-  state.seconds = state.timeMode==="crescente" ? 0 : Number(document.getElementById("minInicial").value||20)*60;
-  save(); render();
-}
-
-function abrirTelaPlacar(){
-  const url = location.href.split("?")[0] + "?tela=placar";
-  const win = window.open(url, "TelaPlacarEletronico", "width=1600,height=900,resizable=yes");
-  if(!win) alert("O navegador bloqueou a nova janela. Permita pop-ups para este site.");
-  else win.focus();
-}
-
-/* MODALIDADE TELA CHEIA (FULLSCREEN) */
-function toggleFullScreen(){
-  if(!document.fullscreenElement){
-    document.body.classList.add("score-screen");
-    document.documentElement.requestFullscreen().catch(err=>{
-      alert(`Erro ao ativar Tela Cheia: ${err.message}`);
-    });
-  } else {
-    if(document.exitFullscreen){
-      document.exitFullscreen();
-    }
-  }
-}
-
-document.addEventListener("fullscreenchange", ()=>{
-  if(!document.fullscreenElement && !params.get("tela")){
-    document.body.classList.remove("score-screen");
-  }
-});
-
-/* EVENT LISTENERS */
-document.querySelectorAll("#modalidades button").forEach(btn=>{
-  btn.onclick=()=>{
-    if(state.matchStarted) return;
-    state.sport = btn.dataset.sport;
-    save(); render();
-  };
-});
-
-document.getElementById("selectEsporte").onchange=e=>{
-  if(state.matchStarted){ render(); return; }
-  state.sport=e.target.value; save(); render();
-};
-
-document.getElementById("inputJogo").oninput=e=>{ state.game=e.target.value; save(); render(); };
-document.getElementById("inputAviso").oninput=e=>{ state.notice=e.target.value; save(); render(); };
-document.getElementById("inputA").oninput=e=>{ state.a=e.target.value; save(); render(); };
-document.getElementById("inputB").oninput=e=>{ state.b=e.target.value; save(); render(); };
-
-document.getElementById("tipoTempo").onchange=e=>{
-  state.timeMode=e.target.value;
-  if(timer){ clearInterval(timer); timer=null; }
-  state.running=false;
-  state.seconds = state.timeMode==="crescente" ? 0 : Number(document.getElementById("minInicial").value||20)*60;
-  save(); render();
-};
-
-/* INICIALIZAÇÃO DA DROPDOWN DE ESPORTES */
-const selectEsporte = document.getElementById("selectEsporte");
-SPORTS.forEach(s=>{
-  const option = document.createElement("option");
-  option.value = s; option.textContent = s;
-  selectEsporte.appendChild(option);
-});
-
-/* VERIFICAÇÃO DO MODO DE TELA VIA URL */
-const params = new URLSearchParams(location.search);
-if(params.get("tela")==="placar"){
-  document.body.classList.add("score-screen");
-}else{
-  document.body.classList.add("operator-screen");
-}
-
-load();
-render();
-
-setTimeout(()=>{
-  if(channel) channel.postMessage({ type:"STATE", state });
-},100);
-</script>
-
-</body>
-</html>
+<script>const SPORTS=["Futsal","Voleibol","Handebol","Baleado","Basquete"];const STORAGE="placar-estudantil-profissional-2026";const CHANNEL="placar-estudantil-canal-2026";const defaultState = { sport:"Futsal", game:"Fase de Grupos", notice:"BEM-VINDOS AOS JOGOS ESTUDANTIS 2026 • BOA PARTIDA A TODOS!", a:"Time da Casa", b:"Visitante", scoreA:0,scoreB:0,setsA:0,setsB:0, seconds:1200,running:false,period:1,timeMode:"decrescente"};let state={...defaultState};let timerInterval=null;let lastTickTimestamp = null; let channel=null;try{ channel=new BroadcastChannel(CHANNEL); channel.onmessage=(e)=>{ if(e.data && e.data.type==="STATE"){ const wasRunning = state.running; state={...state,...e.data.state}; if(wasRunning !== state.running){ if(state.running) startTimer(true); else pauseTimer(true); } render(); } };}catch(e){console.error("BroadcastChannel não suportado");}function save(replicate = true){ localStorage.setItem(STORAGE,JSON.stringify(state)); if(channel && replicate) channel.postMessage({type:"STATE",state});}function load(){ try{ const s=JSON.parse(localStorage.getItem(STORAGE)); if(s) state={...state,...s}; if(state.seconds < 0) state.seconds = 0; }catch(e){state={...defaultState};}}function formatTime(s){ s=Math.max(0,Math.floor(s)); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}function render(){ const setText=state.sport==="Voleibol" ? state.period+"º SET" : state.period+"º TEMPO"; document.getElementById("nomeJogo").textContent=state.game.toUpperCase(); document.getElementById("esporteTela").textContent=state.sport.toUpperCase(); document.getElementById("avisoTela").textContent=state.notice; document.getElementById("nomeA").textContent=state.a.toUpperCase(); document.getElementById("nomeB").textContent=state.b.toUpperCase(); document.getElementById("tituloA").textContent=state.a.toUpperCase(); document.getElementById("tituloB").textContent=state.b.toUpperCase(); document.getElementById("adminLabelA").textContent = state.a.toUpperCase(); document.getElementById("adminLabelB").textContent = state.b.toUpperCase(); document.getElementById("pontosA").textContent=state.scoreA; document.getElementById("pontosB").textContent=state.scoreB; const directA = document.getElementById("directScoreA"); const directB = document.getElementById("directScoreB"); if(directA && document.activeElement !== directA) directA.value = state.scoreA; if(directB && document.activeElement !== directB) directB.value = state.scoreB; document.getElementById("setsA").textContent="SETS: "+state.setsA; document.getElementById("setsB").textContent="SETS: "+state.setsB; document.getElementById("clock").textContent=formatTime(state.seconds); document.getElementById("periodo").textContent=setText; document.getElementById("periodoCentro").textContent=setText; const volei=state.sport==="Voleibol"; document.getElementById("setsA").classList.toggle("hidden",!volei); document.getElementById("setsB").classList.toggle("hidden",!volei); document.getElementById("clockBox").classList.toggle("hidden",volei); const btnStart = document.getElementById("btnStart"); const startIcon = document.getElementById("startIcon"); const startText = document.getElementById("startText"); const btnPause = document.getElementById("btnPause"); if(btnStart && btnPause){ if(state.running){ btnStart.className = "btn add"; startIcon.textContent = "▶"; startIcon.className = "blink-icon"; startText.textContent = "CORRENDO"; btnPause.disabled = false; btnPause.className = "btn sub"; } else { btnStart.className = "btn add"; startIcon.textContent = "▶"; startIcon.className = "static-icon"; startText.textContent = (state.seconds === 0 && state.timeMode === "decrescente") ? "INICIAR" : "RETOMAR"; btnPause.disabled = true; btnPause.className = "btn dark"; } } document.getElementById("adminSetsBoxA").classList.toggle("hidden", !volei); document.getElementById("adminSetsBoxB").classList.toggle("hidden", !volei); const voleiCtrls = volei ? '<button class="btn dark" onclick="changeSet(&quot;A&quot;,-1)">− SET</button><button class="btn yellow" onclick="changeSet(&quot;A&quot;,1)">+ SET</button>' : ""; document.getElementById("setsCtrlA").innerHTML=voleiCtrls; document.getElementById("setsCtrlB").innerHTML=volei ? voleiCtrls.replace(/&quot;A&quot;/g, '&quot;B&quot;') : ""; const inputs = ["inputJogo", "inputAviso", "inputA", "inputB"]; inputs.forEach(id => { const el = document.getElementById(id); if(el && document.activeElement !== el) { if(id === "inputJogo") el.value = state.game; if(id === "inputAviso") el.value = state.notice; if(id === "inputA") el.value = state.a; if(id === "inputB") el.value = state.b; } }); const selectEsporte=document.getElementById("selectEsporte"); if(selectEsporte) selectEsporte.value=state.sport; const tipoTempo=document.getElementById("tipoTempo"); if(tipoTempo) tipoTempo.value=state.timeMode||"decrescente"; document.querySelectorAll("#modalidades button").forEach(b=>{ b.classList.toggle("active",b.dataset.sport===state.sport); });}function addScore(team,q){ const key=team==="A"?"scoreA":"scoreB"; state[key]=Math.max(0,state[key]+q); save(); render();}function setDirectScore(team){ const input = document.getElementById(team==="A" ? "directScoreA" : "directScoreB"); const val = parseInt(input.value, 10); if(!isNaN(val) && val >= 0){ if(team==="A") state.scoreA = val; else state.scoreB = val; save(); render(); }}function changeSet(team,q){ const key=team==="A"?"setsA":"setsB"; state[key]=Math.max(0,state[key]+q); save(); render();}function startTimer(isRemote = false){ if(timerInterval) clearInterval(timerInterval); if(state.timeMode === "decrescente" && state.seconds <= 0) { state.running = false; render(); return; } state.running=true; lastTickTimestamp = Date.now(); if(!isRemote) save(); timerInterval=setInterval(()=>{ if(!state.running) { clearInterval(timerInterval); return; } const now = Date.now(); const deltaMs = now - lastTickTimestamp; if(deltaMs >= 1000){ const secondsPassed = Math.floor(deltaMs / 1000); lastTickTimestamp += secondsPassed * 1000; if(state.timeMode === "crescente"){ state.seconds += secondsPassed; } else { state.seconds -= secondsPassed; if(state.seconds <= 0){ state.seconds = 0; pauseTimer(); } } save(); render(); } }, 200); render();}function pauseTimer(isRemote = false){ state.running=false; if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } lastTickTimestamp = null; if(!isRemote) save(); render();}function adjustTime(sec){ state.seconds=Math.max(0,state.seconds+sec); if(state.running) lastTickTimestamp = Date.now(); save(); render();}function nextPeriod(){ pauseTimer(); state.period++; if(state.sport!=="Voleibol"){ const minIni = Number(document.getElementById("minInicial").value||20); state.seconds = state.timeMode === "crescente" ? 0 : minIni*60; } save(); render();}function resetAll(){ pauseTimer(); state = { ...defaultState, game: state.game, notice: state.notice, sport: state.sport, a: state.a, b: state.b, timeMode: state.timeMode }; const minIni = Number(document.getElementById("minInicial").value||20); state.seconds = state.timeMode === "crescente" ? 0 : minIni*60; save(); render();}function abrirTelaPlacar(){ const url=location.href.split("?")[0]+"?tela=placar"; const win=window.open(url,"TelaPlacarEletronico","width=1600,height=900,resizable=yes,scrollbars=no,status=no,location=no"); if(!win){ alert("O navegador bloqueou a nova janela. Permita pop-ups para este site."); return; } win.focus();}document.querySelectorAll("#modalidades button").forEach(b=>{ b.onclick=()=>{ pauseTimer(); state.sport=b.dataset.sport; save(); render(); };});function bindInput(id, stateKey) { const el = document.getElementById(id); if(el) { el.oninput = (e) => { state[stateKey] = e.target.value; save(); }; el.onblur = () => render(); }}bindInput("inputJogo", "game");bindInput("inputAviso", "notice");bindInput("inputA", "a");bindInput("inputB", "b");const selectEsporte=document.getElementById("selectEsporte");if(selectEsporte) { SPORTS.forEach(s=>{ const o=document.createElement("option"); o.value=s; o.textContent=s; selectEsporte.appendChild(o); }); selectEsporte.onchange=e=>{ pauseTimer(); state.sport=e.target.value; save(); render(); };}const minInicialInput=document.getElementById("minInicial");if(minInicialInput) minInicialInput.onchange=e=>{ if(!state.running && state.timeMode !== "crescente"){ state.seconds = Number(e.target.value || 20) * 60; save(); render(); }};const tipoTempoControl=document.getElementById("tipoTempo");if(tipoTempoControl) tipoTempoControl.onchange=e=>{ pauseTimer(); state.timeMode=e.target.value; const minIni = Number(document.getElementById("minInicial").value||20); state.seconds=state.timeMode==="crescente" ? 0 : minIni*60; save(); render();};const params=new URLSearchParams(location.search);if(params.get("tela")==="placar"){ document.body.classList.add("score-screen"); document.body.classList.remove("operator-screen");}else{ document.body.classList.add("operator-screen"); document.body.classList.remove("score-screen");}load();render();if(state.running){ startTimer(true);}setTimeout(()=>{if(channel) channel.postMessage({type:"STATE",state})},200);</script></body></html>```
