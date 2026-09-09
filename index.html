@@ -1,5 +1,6 @@
 
 
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  <!DOCTYPE html>
  <html lang="pt-BR">
@@ -176,7 +177,7 @@
  body.score-screen{padding:0;background:#020408;overflow:hidden}
  body.score-screen .operator-only{display:none!important}
  body.score-screen .app{max-width:none;width:100vw;height:100vh}
- body.score-screen .topbar{padding:10px 28px;margin:0;background:#070b10;border-bottom:1px solid #26313c}
+ body.score-screen .topbar{padding:10px 28px;margin:0;background:#070b10;border-bottom:0}
  body.score-screen .modebar{display:none}
  body.score-screen .announcement{margin:0;border-radius:0;border-left:0;border-right:0}
  body.score-screen .scoreboard{
@@ -702,27 +703,38 @@ body.score-screen .controls{display:none}
    IMPORTANTE: substitua os valores abaixo pelos dados do seu projeto
    Firebase. A parte visual do placar permanece intacta.
    ================================================================ */
+/* ================================================================
+   CONFIGURAÇÃO DO FIREBASE
+   Para funcionar em OUTRO computador, preencha estes 7 campos com
+   os dados do seu projeto Firebase. Sem isso, o navegador usa apenas
+   localStorage/BroadcastChannel, que funcionam somente localmente.
+   ================================================================ */
 const firebaseConfig={
   apiKey:"COLE_AQUI_SUA_API_KEY",
-  authDomain:"SEU-PROJETO.firebaseapp.com",
-  databaseURL:"https://SEU-PROJETO-default-rtdb.firebaseio.com",
-  projectId:"SEU-PROJETO",
-  storageBucket:"SEU-PROJETO.appspot.com",
-  messagingSenderId:"SEU_MESSAGING_SENDER_ID",
-  appId:"SEU_APP_ID"
+  authDomain:"COLE_AQUI_SEU_AUTH_DOMAIN",
+  databaseURL:"COLE_AQUI_SUA_DATABASE_URL",
+  projectId:"COLE_AQUI_SEU_PROJECT_ID",
+  storageBucket:"COLE_AQUI_SEU_STORAGE_BUCKET",
+  messagingSenderId:"COLE_AQUI_SEU_MESSAGING_SENDER_ID",
+  appId:"COLE_AQUI_SEU_APP_ID"
 };
 
 let onlineDB=null;
 let onlineRef=null;
 let onlineEnabled=false;
+const firebaseReady=Object.values(firebaseConfig).every(v=>
+  typeof v==="string" && v.trim()!=="" && !v.startsWith("COLE_AQUI") && !v.startsWith("SEU-PROJETO")
+);
 try{
-  if(window.firebase && firebaseConfig.apiKey.startsWith("COLE_AQUI")===false){
-    firebase.initializeApp(firebaseConfig);
+  if(window.firebase && firebaseReady){
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     onlineDB=firebase.database();
     onlineEnabled=true;
+  }else{
+    console.warn("Firebase não configurado. A sincronização entre computadores ficará desativada.");
   }
 }catch(error){
-  console.warn("Firebase não configurado:",error);
+  console.error("Falha ao iniciar Firebase:",error);
 }
 
 const SPORTS=["Futsal","Voleibol","Handebol","Baleado","Basquete"];
@@ -731,6 +743,15 @@ const params=new URLSearchParams(location.search);
 const isScoreScreen=params.get("tela")==="placar";
 const MATCH_ID=(params.get("id")||"jogos2026").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80)||"jogos2026";
 if(onlineEnabled){ onlineRef=onlineDB.ref("placares/"+MATCH_ID); }
+
+function showSyncWarning(){
+  if(!isScoreScreen || onlineEnabled) return;
+  const box=document.createElement("div");
+  box.id="syncWarning";
+  box.textContent="⚠ SINCRONIZAÇÃO ONLINE NÃO CONFIGURADA — ESTA TELA NÃO RECEBERÁ ATUALIZAÇÕES DE OUTRO COMPUTADOR.";
+  box.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:#8b1e2d;color:#fff;padding:10px 14px;text-align:center;font:700 14px Arial;";
+  document.body.appendChild(box);
+}
  const CHANNEL="placar-estudantil-canal-2026";
  const defaultState={
    sport:"Futsal",
