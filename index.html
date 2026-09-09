@@ -1,14 +1,20 @@
 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  <!DOCTYPE html>
  <html lang="pt-BR">
  <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Placar Profissional — Jogos Estudantis 2026</title>
+
+<!-- SINCRONIZAÇÃO ONLINE EM TEMPO REAL -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
  <!-- FONTE RETRÔ ESTILO CALCULADORA/LED DIGITAL -->
- <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
- <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
- <link href="[https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap](https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap)" rel="stylesheet">
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
  <style>
  :root{
    --bg:#07090d; --panel:#10151c; --panel2:#151c25; --line:#27313d;
@@ -285,7 +291,7 @@
  body.score-screen .clockbox .period {
    display: none !important;
  }
- 
+
  /* VÔLEI: placar de sets abaixo de cada pontuação */
  .score-side .sets{display:none}
  .score-side .sets.hidden{display:none}
@@ -500,7 +506,7 @@ body.score-screen .controls{display:none}
      font-size:clamp(1.8rem,10vw,4rem);
    }
  }
- 
+
 /* CRONÔMETRO MM:SS:CC — largura estável e atualização em centésimos */
 .clock{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";min-width:max-content}
 .clock-digit{font-variant-numeric:tabular-nums}
@@ -690,8 +696,41 @@ body.score-screen .controls{display:none}
      <button class="reset" onclick="resetAll()">↻ REINICIAR PARTIDA / ZERAR TUDO</button>
    </section>
  </div>
- <script>const SPORTS=["Futsal","Voleibol","Handebol","Baleado","Basquete"];
+ <script>
+/* ================================================================
+   SINCRONIZAÇÃO ONLINE - FIREBASE REALTIME DATABASE
+   IMPORTANTE: substitua os valores abaixo pelos dados do seu projeto
+   Firebase. A parte visual do placar permanece intacta.
+   ================================================================ */
+const firebaseConfig={
+  apiKey:"COLE_AQUI_SUA_API_KEY",
+  authDomain:"SEU-PROJETO.firebaseapp.com",
+  databaseURL:"https://SEU-PROJETO-default-rtdb.firebaseio.com",
+  projectId:"SEU-PROJETO",
+  storageBucket:"SEU-PROJETO.appspot.com",
+  messagingSenderId:"SEU_MESSAGING_SENDER_ID",
+  appId:"SEU_APP_ID"
+};
+
+let onlineDB=null;
+let onlineRef=null;
+let onlineEnabled=false;
+try{
+  if(window.firebase && firebaseConfig.apiKey.startsWith("COLE_AQUI")===false){
+    firebase.initializeApp(firebaseConfig);
+    onlineDB=firebase.database();
+    onlineEnabled=true;
+  }
+}catch(error){
+  console.warn("Firebase não configurado:",error);
+}
+
+const SPORTS=["Futsal","Voleibol","Handebol","Baleado","Basquete"];
  const STORAGE="placar-estudantil-profissional-2026";
+const params=new URLSearchParams(location.search);
+const isScoreScreen=params.get("tela")==="placar";
+const MATCH_ID=(params.get("id")||"jogos2026").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,80)||"jogos2026";
+if(onlineEnabled){ onlineRef=onlineDB.ref("placares/"+MATCH_ID); }
  const CHANNEL="placar-estudantil-canal-2026";
  const defaultState={
    sport:"Futsal",
@@ -774,11 +813,16 @@ function persist(replicate=true){
   const snapshot=stateForStorage();
   localStorage.setItem(STORAGE,JSON.stringify(snapshot));
 
+  /* Operador grava no servidor; telas remotas apenas recebem. */
+  if(onlineEnabled && onlineRef && !isScoreScreen){
+    onlineRef.set(snapshot).catch(error=>console.error("Erro ao sincronizar placar:",error));
+  }
+
+  /* Mantém compatibilidade com a janela local. */
   if(channel && replicate){
     channel.postMessage({type:"STATE",state:snapshot,sentAt:nowMs()});
   }
 
-  // Envio direto para a janela do placar: atualização em tempo real.
   scoreWindows.forEach(win=>{
     try{
       if(win && !win.closed){
@@ -1049,7 +1093,7 @@ function abrirTelaPlacar(){
      O relógio continua correndo porque startedAt NÃO é alterado.
    */
    persist();
-   const url=location.href.split("?")[0]+"?tela=placar";
+   const url=location.href.split("?")[0]+"?tela=placar&id="+encodeURIComponent(MATCH_ID);
    const win=window.open(
      url,
      "TelaPlacarEletronico",
@@ -1173,13 +1217,33 @@ try{
      render();
    };
  }
- const params=new URLSearchParams(location.search);
  if(params.get("tela")==="placar"){
    document.body.classList.add("score-screen");
    document.body.classList.remove("operator-screen");
  }else{
    document.body.classList.add("operator-screen");
    document.body.classList.remove("score-screen");
+ }
+ // ================================================================
+ // RECEPÇÃO ONLINE: qualquer computador que abrir ?tela=placar&id=...
+ // recebe o estado atual e todas as alterações em tempo real.
+ // ================================================================
+ if(onlineEnabled && onlineRef){
+   if(isScoreScreen){
+     onlineRef.on("value",snapshot=>{
+       const incoming=snapshot.val();
+       if(incoming) applyIncoming(incoming);
+     },error=>console.error("Erro ao receber placar online:",error));
+   }else{
+     onlineRef.once("value").then(snapshot=>{
+       if(snapshot.exists()){
+         applyIncoming(snapshot.val());
+         render();
+       }else{
+         persist(false);
+       }
+     }).catch(error=>console.error("Erro ao carregar placar online:",error));
+   }
  }
  load();
  render();
