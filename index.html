@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -27,10 +26,12 @@
     button { cursor: pointer; transition: all 0.2s ease; }
     .app { max-width: 1400px; margin: auto; }
     .topbar {
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 16px; margin-bottom: 14px; padding: 0 8px;
+      display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+      align-items: center; gap: 16px; margin-bottom: 14px; padding: 0 8px;
     }
-    .brand { flex: 1; text-align: center; }
+    .topbar .operator-only { grid-column: 1; justify-self: start; }
+    .brand { grid-column: 2; justify-self: center; text-align: center; min-width: 0; }
+    .topbar .status { grid-column: 3; justify-self: end; }
     .brand h1 {
       font-size: clamp(1.6rem, 3.2vw, 2.8rem);
       letter-spacing: .12em; text-transform: uppercase; font-weight: 900;
@@ -178,7 +179,9 @@
     .hidden { display: none!important; }
     
     @media(max-width:850px){
-      .topbar { flex-direction: column; gap: 10px; }
+      .topbar { grid-template-columns: 1fr; grid-template-rows: auto auto auto; justify-items: center; gap: 10px; }
+      .topbar .operator-only, .topbar .status { justify-self: center; }
+      .brand { grid-column: 1; }
       .scoregrid { grid-template-columns: 1fr; gap: 16px; }
       .center-score { order: 2; }
       .score-side { order: 1; }
@@ -275,6 +278,26 @@
     .blink-icon { animation: blink 1s linear infinite; margin-right: 8px; }
     .static-icon { margin-right: 8px; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; filter: grayscale(0.6); }
+
+    /* ===== MODO PAISAGEM FORÇADO NO MOBILE (ANDROID/iOS) =====
+       A Screen Orientation API (usada no JS, no fim do arquivo) só funciona em
+       alguns navegadores Android e exige tela cheia. O Safari/iOS não suporta
+       essa API de jeito nenhum, então o único jeito confiável de forçar a
+       paisagem em QUALQUER celular é rotacionar a página via CSS quando o
+       aparelho está em pé (retrato). */
+    @media screen and (max-width: 930px) and (orientation: portrait){
+      html{
+        width: 100vh;
+        height: 100vw;
+        overflow-x: hidden;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: top left;
+        transform: rotate(90deg) translateY(-100%);
+      }
+      body{ min-height: 100vw; }
+    }
   </style>
 </head>
 <body>
@@ -464,6 +487,29 @@
     };
     
     let state = {...defaultState};
+    let lastNoticeRendered = null;
+
+    // Mantém a velocidade do aviso constante (em pixels/segundo), calculando a
+    // duração da animação a partir da largura real do texto. Isso evita que o
+    // aviso pareça "correr" mais rápido quando o texto é maior ou a fonte fica
+    // maior na tela do painel/TV.
+    const MARQUEE_SPEED_PX_S = 130;
+    function ajustarVelocidadeAviso(){
+      const el = document.getElementById("avisoTela");
+      if(!el) return;
+      const largura = el.scrollWidth || el.offsetWidth || 0;
+      if(largura <= 0) return;
+      const duracao = Math.max(8, (largura * 2) / MARQUEE_SPEED_PX_S);
+      el.style.animationDuration = duracao.toFixed(2) + "s";
+    }
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(ajustarVelocidadeAviso, 150);
+    });
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(ajustarVelocidadeAviso).catch(() => {});
+    }
 
     // Sempre que o estado mudar no Firebase (em qualquer dispositivo/navegador),
     // esta tela recebe a atualização automaticamente em tempo real.
@@ -544,7 +590,13 @@
       
       document.getElementById("nomeJogo").textContent = state.game.toUpperCase();
       document.getElementById("esporteTela").textContent = state.sport.toUpperCase();
-      document.getElementById("avisoTela").textContent = state.notice;
+      if(state.notice !== lastNoticeRendered){
+        const avisoEl = document.getElementById("avisoTela");
+        avisoEl.textContent = state.notice;
+        lastNoticeRendered = state.notice;
+        // pequeno atraso para garantir que o navegador já mediu o novo texto
+        requestAnimationFrame(ajustarVelocidadeAviso);
+      }
       document.getElementById("nomeA").textContent = state.a.toUpperCase();
       document.getElementById("nomeB").textContent = state.b.toUpperCase();
       document.getElementById("tituloA").textContent = state.a.toUpperCase();
@@ -813,6 +865,21 @@
       document.body.classList.add("operator-screen");
       document.body.classList.remove("score-screen");
     }
+
+    // Tenta travar a orientação em paisagem nativamente (funciona em parte dos
+    // navegadores Android, geralmente só em modo tela cheia). Em navegadores
+    // que não suportam (todo o iOS/Safari, e a maioria fora de tela cheia),
+    // isso falha silenciosamente e quem garante a paisagem é o CSS acima.
+    function tentarTravarPaisagem(){
+      try{
+        if(screen.orientation && screen.orientation.lock){
+          screen.orientation.lock("landscape").catch(() => {});
+        }
+      } catch(e){ /* navegador não suporta — o CSS de rotação cobre esse caso */ }
+    }
+    tentarTravarPaisagem();
+    window.addEventListener("orientationchange", tentarTravarPaisagem);
+    document.addEventListener("click", tentarTravarPaisagem, { once: true });
 
     load();
     render();
