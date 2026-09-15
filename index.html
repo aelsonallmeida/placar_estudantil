@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -423,9 +424,18 @@
 
   <script>
     // ============ CONFIGURAÇÃO DO FIREBASE ============
-const firebaseConfig = {
-    databaseURL: "https://jogos-estudantis-default-rtdb.firebaseio.com/"
-};
+    // Troque pelos dados do SEU projeto (veja instruções enviadas junto com o código).
+    // Console Firebase > Configurações do projeto > Seus apps > SDK do Firebase (config)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCEaHpu1yNOPCcLgstOIycnVjc8q-dSKDE",
+      authDomain: "placar-estudantil.firebaseapp.com",
+      databaseURL: "https://placar-estudantil-default-rtdb.firebaseio.com",
+      projectId: "placar-estudantil",
+      storageBucket: "placar-estudantil.firebasestorage.app",
+      messagingSenderId: "349323655941",
+      appId: "1:349323655941:web:5661c97c1dc8890d9f156c",
+      measurementId: "G-KSCC2S2DM3"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     // Caminho único onde o estado do placar fica salvo no banco.
