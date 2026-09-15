@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -195,6 +196,7 @@
     /* ESTILIZAÇÃO DA TELA DE TRANSMISSÃO / PLACAR */
     body.score-screen { padding: 0; background: #020408; overflow: hidden; }
     body.score-screen .operator-only { display: none!important; }
+     body.score-screen #loginOverlay { display: none!important; }
     body.score-screen .app { max-width: none; width: 100vw; height: 100vh; }
     body.score-screen .topbar { padding: 10px 28px; margin: 0; background: #070b10; border-bottom: 1px solid #26313c; }
     body.score-screen .modebar { display: none; }
@@ -279,6 +281,69 @@
     .static-icon { margin-right: 8px; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; filter: grayscale(0.6); }
 
+
+    /* ===== PROTEÇÃO DE ACESSO AO PAINEL ===== */
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #18212b 0, #05070a 55%);
+      padding: 20px;
+    }
+    #loginOverlay.show { display: flex; }
+    .login-box {
+      width: min(420px, 92vw);
+      background: linear-gradient(145deg,#10151c,#151c24);
+      border: 2px solid var(--lime);
+      border-radius: 18px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 0 35px rgba(184,255,0,.25), var(--shadow);
+    }
+    .login-box h2 {
+      color: var(--lime);
+      margin-bottom: 10px;
+      font-size: 1.7rem;
+    }
+    .login-box p {
+      color: var(--muted);
+      margin-bottom: 18px;
+      font-weight: 700;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #080c11;
+      color: #fff;
+      outline: none;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 15px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--lime);
+      color: #080b0e;
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+    .login-error {
+      display: none;
+      color: #ff7180;
+      margin-top: 12px;
+      font-weight: 900;
+    }
+    .login-error.show { display: block; }
+
     /* ===== MODO PAISAGEM FORÇADO NO MOBILE (ANDROID/iOS) =====
        A Screen Orientation API (usada no JS, no fim do arquivo) só funciona em
        alguns navegadores Android e exige tela cheia. O Safari/iOS não suporta
@@ -301,6 +366,17 @@
   </style>
 </head>
 <body>
+
+  <div id="loginOverlay">
+    <div class="login-box">
+      <h2>🔐 ACESSO AO PAINEL</h2>
+      <p>Digite a senha para acessar o Painel de Controle.</p>
+      <input id="loginPassword" type="password" placeholder="Digite a senha" autocomplete="off">
+      <button type="button" onclick="verificarSenha()">ENTRAR NO PAINEL</button>
+      <div id="loginError" class="login-error">❌ Senha incorreta!</div>
+    </div>
+  </div>
+
   <div class="app">
     <header class="topbar">
       <div style="width: 140px;" class="operator-only"></div>
@@ -857,6 +933,46 @@
       render();
     };
 
+
+    // ============ PROTEÇÃO DO PAINEL ============
+    const SENHA_PAINEL = "jogos2026";
+    const LOGIN_KEY = "placar-painel-autorizado-2026";
+
+    function mostrarLogin() {
+      const overlay = document.getElementById("loginOverlay");
+      if(overlay) {
+        overlay.classList.add("show");
+        setTimeout(() => document.getElementById("loginPassword")?.focus(), 50);
+      }
+    }
+
+    function esconderLogin() {
+      const overlay = document.getElementById("loginOverlay");
+      if(overlay) overlay.classList.remove("show");
+    }
+
+    function verificarSenha() {
+      const input = document.getElementById("loginPassword");
+      const erro = document.getElementById("loginError");
+      if(input && input.value === SENHA_PAINEL) {
+        sessionStorage.setItem(LOGIN_KEY, "1");
+        esconderLogin();
+        if(erro) erro.classList.remove("show");
+        input.value = "";
+      } else {
+        if(erro) erro.classList.add("show");
+        if(input) {
+          input.value = "";
+          input.focus();
+        }
+      }
+    }
+
+    document.getElementById("loginPassword")?.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") verificarSenha();
+    });
+    // =============================================
+
     const params = new URLSearchParams(location.search);
     if(params.get("tela") === "placar"){
       document.body.classList.add("score-screen");
@@ -864,6 +980,11 @@
     } else {
       document.body.classList.add("operator-screen");
       document.body.classList.remove("score-screen");
+
+      // A senha é exigida SOMENTE no painel de controle.
+      if(sessionStorage.getItem(LOGIN_KEY) !== "1") {
+        mostrarLogin();
+      }
     }
 
     // Tenta travar a orientação em paisagem nativamente (funciona em parte dos
